@@ -22,6 +22,10 @@ Roles = {
 }
 
 function love.load()
+	-- Limit FPS
+	min_dt = 1/60
+	next_time = love.timer.getTime()
+
     server = sock.newServer("*", 22122)
 
     server:on("connect", function(data, client)
@@ -53,5 +57,16 @@ function love.load()
 end
 
 function love.update(dt)
+	-- Limit FPS
+	next_time = next_time + min_dt
+
     server:update()
+
+	-- Limit FPS
+	local cur_time = love.timer.getTime()
+	if next_time <= cur_time then
+		next_time = cur_time
+	return
+	end
+	love.timer.sleep(next_time - cur_time)
 end
