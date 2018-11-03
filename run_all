@@ -1,0 +1,7 @@
+#!/bin/sh
+xfce4-terminal -e 'bash -c "cd ~/Workspace/Love2d/Kumquat/; love server"' -T "Kumquat server"
+sleep 0.3
+love client &
+
+xfce4-terminal -e 'bash -c "cd ~/Workspace/Love2d/Kumquat/; love client"' -T "Kumquat buddy"
+sleep 0.3
