@@ -1,4 +1,4 @@
-HOSTNAME = "sofapizza" -- or sofapizza.de
+HOSTNAME = "sofapizza.de" -- or sofapizza.de
 PORT = 22122
 
 -- no blurry images

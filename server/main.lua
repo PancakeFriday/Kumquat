@@ -33,6 +33,8 @@ function love.load()
 			-- Create a new match
 			table.insert(Matches, {})
 		end
+
+		print("Received player and assigned role " .. Roles[player_num])
     end)
 
 	server:setSchema("player_state", Player:getSchema())
