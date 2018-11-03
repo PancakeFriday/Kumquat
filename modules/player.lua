@@ -58,7 +58,7 @@ function Player:update(dt)
 		-- Apply friction
 		xforces = xforces - self.hfriction * self.hvel
 	end
-	self.hvel = _.clamp(self.hvel + xforces*dt, -self.maxhvel, self.maxhvel)
+	self.hvel = lume.clamp(self.hvel + xforces*dt, -self.maxhvel, self.maxhvel)
 
 	dx = self.hvel * dt
 
