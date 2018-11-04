@@ -1,3 +1,6 @@
 [submodule "client/lua-namegen"]
 	path = lib/namegen/
 	url = https://github.com/LukeMS/lua-namegen
+[submodule "lib/lua-namegen"]
+	path = lib/namegen
+	url = https://github.com/LukeMS/lua-namegen
