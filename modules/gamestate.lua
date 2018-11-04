@@ -1,28 +1,30 @@
 local Gamestate = {
-	loaded = {},
 	registered = {},
-	names = {}
+	names = {},
+	instances = {}
 }
 
 function Gamestate:register(s, n)
 	if not lume.find(self.registered, s) then
-		table.insert(self.registered, s)
-		table.insert(self.names, n)
+		self.registered[n] = s
 	else
 		print("[WARNING] Class ".." already registered as a gamestate!")
 	end
 end
 
-function Gamestate:set(s)
-	if not lume.find(self.registered, s) then
+function Gamestate:set(n, ...)
+	if not self.registered[n] then
 		error("Class is not registered as a gamestate. Call register(...) before setting it")
 	end
 
-	self.state = s
-	if not self.loaded[s] then
-		self:load()
-		self.loaded[s] = true
+	if not self.instances[n] then
+		self.instances[n] = self.registered[n](...)
 	end
+	self.state = self.instances[n]
+end
+
+function Gamestate:reset(n)
+	self.instances[n] = nil
 end
 
 function Gamestate:call(f, ...)

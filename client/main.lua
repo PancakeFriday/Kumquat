@@ -1,4 +1,3 @@
-HOSTNAME = "localhost" -- or sofapizza.de
 PORT = 22122
 
 -- no blurry images
@@ -13,19 +12,20 @@ lume = require "lume"
 
 -- Add modules to path
 package.path = package.path .. ";modules/?.lua"
-local Player = require "player"
 Gamestate = require "gamestate"
 
 -- Gamestates
 package.path = package.path .. ";client/?.lua"
+local Menu = require "menu"
 local Lobby = require "lobby"
+local Game = require "game"
 
 ROLE = ""
 
-function connect_to_server()
+function connect_to_server(hostname)
 	if not Client or not Client:isConnected() then
 		-- Creating a new client on localhost:22122
-		Client = sock.newClient(HOSTNAME, PORT)
+		Client = sock.newClient(hostname, PORT)
 
 		-- Called when a connection is made to the server
 		Client:on("connect", function(data)
@@ -56,8 +56,13 @@ function love.load()
 	min_dt = 1/60
 	next_time = love.timer.getTime()
 
+	-- Set random seed
+	math.randomseed(os.time())
+
+	Gamestate:register(Menu, "Menu")
 	Gamestate:register(Lobby, "Lobby")
-	Gamestate:set(Lobby)
+	Gamestate:register(Game, "Game")
+	Gamestate:set("Menu")
 end
 
 function love.update(dt)
@@ -69,28 +74,11 @@ function love.update(dt)
 	if Client then
 		Client:update()
 	end
-
-	--if ROLE == "player" then
-		--Player:update(dt)
-		--client:send("player_state", Player:getSerialized())
-	--end
 end
 
 function love.draw()
 	Gamestate:draw()
 end
-
---function love.draw()
-	--Player:draw()
-
-	---- Limit FPS
-	--local cur_time = love.timer.getTime()
-	--if next_time <= cur_time then
-		--next_time = cur_time
-	--return
-	--end
-	--love.timer.sleep(next_time - cur_time)
---end
 
 function love.textedited(text, start, length)
 	Gamestate:textedited(text, start, length)

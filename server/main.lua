@@ -5,53 +5,38 @@ package.path = package.path .. ";lib/?.lua"
 local sock = require "sock"
 local bitser = require "bitser"
 Object = require "classic"
-_ = require "lume"
+lume = require "lume"
 
 -- Add modules to path
 package.path = package.path .. ";modules/?.lua"
-local Player = require "player"
 
-Matches = {
-	{}
-}
+-- Local modules
+LobbyFactory = require "lobbyfactory"
+GameFactory = require "gamefactory"
 
-Roles = {
-	"player",
-	"buddy",
-	"foe"
-}
+local Server
 
 function love.load()
 	-- Limit FPS
-	min_dt = 1/60
+	min_dt = 1/20
 	next_time = love.timer.getTime()
 
-    server = sock.newServer("*", 22122)
+	-- Set random seed
+	math.randomseed(love.timer.getTime()*1000)
+	love.math.setRandomSeed(love.timer.getTime()*1000)
 
-    server:on("connect", function(data, client)
-		cur_match = Matches[#Matches]
-		table.insert(cur_match, client)
-		player_num = #cur_match
-        client:send("handshake", Roles[player_num])
-		if player_num == 3 then
-			-- Create a new match
-			table.insert(Matches, {})
-		end
+    Server = sock.newServer("*", 22122)
 
-		print("Received player and assigned role " .. Roles[player_num])
+    Server:on("connect", function(data, client)
+        client:send("handshake")
+		client:setTimeout(32, 5000, 10000)
+		print("Received player", client:getConnectId())
     end)
 
-	server:setSchema("player_state", Player:getSchema())
-	server:on("player_state", function(player_data, client)
-		Player:updateFromData(player_data)
-		data = Player:getSerialized()
-		server:sendToAllBut(client, "update_player", Player:getSerialized())
-	end)
+	LobbyFactory:registerCallbacks(Server)
+	GameFactory:registerCallbacks(Server)
 
-	server:on("disconnect", function(data, client)
-		if #server.clients == 0 then
-			love.quit()
-		end
+	Server:on("disconnect", function(data, client)
 	end)
 
 end
@@ -60,7 +45,8 @@ function love.update(dt)
 	-- Limit FPS
 	next_time = next_time + min_dt
 
-    server:update()
+    Server:update()
+	LobbyFactory:update()
 
 	-- Limit FPS
 	local cur_time = love.timer.getTime()
