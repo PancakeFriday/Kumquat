@@ -58,8 +58,8 @@ function Lobby:registerCallbacks()
 	Client:on("update_players", function(players)
 		self.players = players
 	end)
-	Client:on("start_game", function(players)
-		Gamestate:set("Game", players)
+	Client:on("start_game", function(game_data)
+		Gamestate:set("Game", unpack(game_data))
 		self:unregisterCallbacks()
 	end)
 end

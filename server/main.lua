@@ -1,3 +1,4 @@
+DEV_MODE = true
 PORT = 22122
 
 -- Add libraries to path
@@ -39,6 +40,13 @@ function love.load()
 	Server:on("disconnect", function(data, client)
 	end)
 
+	-- Debug: remove later
+	if DEV_MODE then
+		Server:on("test_game", function(_,client)
+			local lobby = {players={{nickname="test_player",client=client}}}
+			GameFactory:newGame(lobby)
+		end)
+	end
 end
 
 function love.update(dt)

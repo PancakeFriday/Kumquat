@@ -1,3 +1,6 @@
+DEV_MODE = true
+DEV_DRAW = false
+
 PORT = 22122
 
 -- no blurry images
@@ -5,6 +8,7 @@ love.graphics.setDefaultFilter( "nearest", "nearest", 1 )
 
 -- Add libraries to path
 package.path = package.path .. ";lib/?.lua"
+package.path = package.path .. ";lib/?/init.lua"
 local sock = require "sock"
 local bitser = require "bitser"
 Object = require "classic"
@@ -63,6 +67,15 @@ function love.load()
 	Gamestate:register(Lobby, "Lobby")
 	Gamestate:register(Game, "Game")
 	Gamestate:set("Menu")
+
+	-- DEV
+	if DEV_MODE then
+		connect_to_server("localhost")
+		Client:on("start_game", function(game_data)
+			Gamestate:set("Game", unpack(game_data))
+		end)
+		Client:send("test_game")
+	end
 end
 
 function love.update(dt)
@@ -78,6 +91,13 @@ end
 
 function love.draw()
 	Gamestate:draw()
+
+	local cur_time = love.timer.getTime()
+	if next_time <= cur_time then
+		next_time = cur_time
+		return
+	end
+	love.timer.sleep(next_time - cur_time)
 end
 
 function love.textedited(text, start, length)

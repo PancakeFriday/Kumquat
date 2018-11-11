@@ -1,3 +1,5 @@
+local Level = require "level"
+
 local Game = Object:extend()
 
 local Player_Schema = {
@@ -11,6 +13,32 @@ local Roles = {
 }
 function Game:new(lobby)
 	self.players = {}
+	self:createPlayers(lobby)
+
+	local w,h = 100,100
+	self.level = Level(w,h,true)
+	self.level:newObject("grass",0,5,2,2,true)
+	self.level:newObject("grass",5,5,4,7,true)
+	self.level:newObject("grass",14,6,300,2,true)
+	self.level:newObject("grass",2,5,3,2,true)
+	self.level:newObject("grass",0,0,1,5,true)
+
+	local level_data = self.level:getData()
+
+	for j,k in pairs(self.players) do
+		local send_players = {}
+		for i,v in pairs(self.players) do
+			send_players[i] = {
+				role=v.role,
+				nickname=v.nickname,
+				isself=k==v
+			}
+		end
+		k.client:send("start_game", {send_players, level_data})
+	end
+end
+
+function Game:createPlayers(lobby)
 	local lobby_players = lume.shuffle(lobby.players)
 	for i,v in pairs(lobby_players) do
 		self.players[Roles[i]] = {
@@ -23,18 +51,19 @@ function Game:new(lobby)
 		x=0,
 		y=0
 	}
+end
 
-	for j,k in pairs(self.players) do
-		local send_players = {}
-		for i,v in pairs(self.players) do
-			send_players[i] = {
-				role=v.role,
-				nickname=v.nickname,
-				isself=k==v
-			}
-		end
-		k.client:send("start_game", send_players)
-	end
+function Game:getNewLevelData()
+	local level_data = {
+		w=100,
+		h=100,
+		objects={
+		},
+		enemies={
+		}
+	}
+
+	return level_data
 end
 
 function Game:updatePlayer(client, state)

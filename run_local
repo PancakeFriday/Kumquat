@@ -1,0 +1,3 @@
+#!/bin/bash
+xfce4-terminal -e 'bash -c "cd ~/Workspace/Love2d/Kumquat/; love server"' -T "Kumquat server"
+love client
