@@ -50,7 +50,7 @@ end
 function Game:createPlayers(lobby)
 	local lobby_players
 	if not lobby.noshuffle then
-		lume.shuffle(lobby.players)
+		lobby_players = lume.shuffle(lobby.players)
 	else
 		lobby_players = lume.clone(lobby.players)
 	end
