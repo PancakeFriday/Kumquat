@@ -25,21 +25,36 @@ function Game:new(lobby)
 
 	local level_data = self.level:getData()
 
-	for j,k in pairs(self.players) do
-		local send_players = {}
-		for i,v in pairs(self.players) do
-			send_players[i] = {
-				role=v.role,
-				nickname=v.nickname,
-				isself=k==v
-			}
+	if DEV_MODE then
+		self.players["buddy"].client:send("start_game", {
+			{
+				player={role="player", isself=false, nickname="test_player"},
+				buddy={role="buddy",nickname="test_buddy",isself=true},
+				foe={role="foe",nickname="test_foe",isself=false}
+			}, level_data})
+	else
+		for j,k in pairs(self.players) do
+			local send_players = {}
+			for i,v in pairs(self.players) do
+				send_players[i] = {
+					role=v.role,
+					nickname=v.nickname,
+					isself=k==v
+				}
+			end
+			k.client:send("start_game", {send_players, level_data})
 		end
-		k.client:send("start_game", {send_players, level_data})
 	end
 end
 
 function Game:createPlayers(lobby)
-	local lobby_players = lume.shuffle(lobby.players)
+	local lobby_players
+	if not lobby.noshuffle then
+		lume.shuffle(lobby.players)
+	else
+		lobby_players = lume.clone(lobby.players)
+	end
+
 	for i,v in pairs(lobby_players) do
 		self.players[Roles[i]] = {
 			nickname=v.nickname,
@@ -82,6 +97,15 @@ function Game:getPlayerState(client)
 	end
 end
 
+function Game:findClient(client)
+	for i,v in pairs(self.players) do
+		if v.client == client then
+			return true
+		end
+	end
+	return false
+end
+
 local GameFactory = Object:extend()
 
 function GameFactory:new()
@@ -105,6 +129,21 @@ function GameFactory:registerCallbacks(Server)
 			if state then
 				client:send("get_player_state", state)
 				return
+			end
+		end
+	end)
+
+	Server:setSchema("new_level_object", {"obj_type", "obj_prop", "x","y","w","h"})
+	Server:on("new_level_object", function(obj_vars, client)
+		for i,v in pairs(self.games) do
+			if v:findClient(client) then
+				v.level:newObject(obj_vars["obj_prop"], obj_vars["x"], obj_vars["y"],
+					obj_vars["w"], obj_vars["h"], true)
+
+				for j,k in pairs(v.players) do
+					k.client:send("new_level_object", obj_vars)
+				end
+				break
 			end
 		end
 	end)

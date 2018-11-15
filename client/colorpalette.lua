@@ -11,29 +11,15 @@ function Colorpalette:new(...)
 		end
 	end
 
-	self.shaderString = [[
-	vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords ){
-		vec4 current_color = Texel(texture, texture_coords);
-		if (current_color.r <= 0.175) // 0.125
-			return vec4(%s,%s,%s,current_color.a);
-		else if (current_color.r <= 0.30) // 0.25
-			return vec4(%s,%s,%s,current_color.a);
-		else if (current_color.r <= 0.425) // 0.375
-			return vec4(%s,%s,%s,current_color.a);
-		else if (current_color.r <= 0.55) // 0.5
-			return vec4(%s,%s,%s,current_color.a);
-		else if (current_color.r <= 0.675) // 0.625
-			return vec4(%s,%s,%s,current_color.a);
-		else if (current_color.r <= 0.8) // 0.75
-			return vec4(%s,%s,%s,current_color.a);
-		else if (current_color.r <= 0.925) // 0.875
-			return vec4(%s,%s,%s,current_color.a);
-		else if (current_color.r <= 1) // 1.0
-			return vec4(%s,%s,%s,current_color.a);
-		return current_color * color;
-	}
-	]]
-	self.shader = love.graphics.newShader(string.format(self.shaderString, unpack(self.colors)))
+	local Moonshine = require 'moonshine'
+	test = Moonshine(Moonshine.effects.colorize)
+	test.colorize.find_color = {1,0.2,0.2}
+	for i=1,8 do
+		local Moonshine = require 'moonshine'
+		self.effect = Moonshine(Moonshine.effects.colorize)
+		self.effect.colorize.find_color={0.1,0,0}
+	end
+	print(test.colorize.find_color)
 end
 
 return Colorpalette

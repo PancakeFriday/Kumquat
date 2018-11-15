@@ -1,4 +1,4 @@
-DEV_MODE = true
+DEV_MODE = false
 DEV_DRAW = false
 
 PORT = 22122

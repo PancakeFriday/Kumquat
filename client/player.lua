@@ -164,6 +164,8 @@ function Player:draw()
 end
 
 function Player:move(dx, dy)
+	dy = math.min(dy, 5)
+	dx = math.min(dx, 5)
 	local moveby_x, moveby_y = dx, dy
 	-- x movement
 	self.hitbox:move(dx, 0)
