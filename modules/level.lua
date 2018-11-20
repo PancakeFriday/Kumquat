@@ -25,7 +25,7 @@ function Level:createMap()
 	self.map = {screen}
 
 	local map_it = 1
-	while num_screens < 5 do
+	while num_screens < 20 do
 		::get_new_screen::
 		screen = self.map[map_it]
 		local new_screen, dir = screen:newNeighbor()
