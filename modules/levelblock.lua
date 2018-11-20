@@ -14,6 +14,10 @@ function LevelBlock:new(t,x,y,w,h,isserver)
 		self.quads3x3 = {}
 		self.quads2x2 = {}
 		self.quad1x1 = nil
+		self.quadsdecoration = {}
+		for x=0,1 do
+			table.insert(self.quadsdecoration, love.graphics.newQuad(48+x*16,32,16,16,96,48))
+		end
 		for x=0,2 do
 			self.quads3x3[x] = {}
 			for y=0,2 do
@@ -47,9 +51,14 @@ function LevelBlock:draw()
 	local miny = 0
 	local maxx = self.w-1
 	local maxy = self.h-1
+
+	-- We want a random grass pattern, but it shouldn't change every frame
+	math.randomseed(132)
+
 	for ix=minx,maxx do
+		local xpos = (self.x+ix)*16
+		love.graphics.draw(self.img, lume.randomchoice(self.quadsdecoration), xpos, (self.y-1)*16)
 		for iy=miny,maxy do
-			local xpos = (self.x+ix)*16
 			local ypos = (self.y+iy)*16
 
 			if self.w == 1 or self.h == 1 then
@@ -103,6 +112,8 @@ function LevelBlock:draw()
 			end
 		end
 	end
+
+	math.randomseed(os.time())
 
 	if DEV_DRAW then
 		--self.hitbox:draw()

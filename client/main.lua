@@ -3,6 +3,8 @@ DEV_DRAW = false
 
 PORT = 22122
 
+SCREENW, SCREENH = 320,240
+
 -- no blurry images
 love.graphics.setDefaultFilter( "nearest", "nearest", 1 )
 
@@ -24,8 +26,6 @@ local Menu = require "menu"
 local Lobby = require "lobby"
 local Game = require "game"
 
-ROLE = ""
-
 function connect_to_server(hostname)
 	if not Client or not Client:isConnected() then
 		-- Creating a new client on localhost:22122
@@ -37,8 +37,7 @@ function connect_to_server(hostname)
 		end)
 
 		-- Custom callback, called whenever you send the event from the server
-		Client:on("handshake", function(role)
-			ROLE = role
+		Client:on("handshake", function(_)
 			print("Received handshake!")
 		end)
 
@@ -81,6 +80,9 @@ end
 function love.update(dt)
 	-- Limit FPS
 	next_time = next_time + min_dt
+
+	love.math.setRandomSeed(love.timer.getTime())
+	math.randomseed(os.time())
 
 	Gamestate:update(dt)
 

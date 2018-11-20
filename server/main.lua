@@ -1,6 +1,8 @@
 DEV_MODE = false
 PORT = 22122
 
+SCREENW, SCREENH = 320,240
+
 -- Add libraries to path
 package.path = package.path .. ";lib/?.lua"
 local sock = require "sock"

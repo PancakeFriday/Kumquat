@@ -34,7 +34,7 @@ function get_random_name()
 	return Namegen.generate(lume.randomchoice(race_list))
 end
 
-hostname = {text = "sofapizza.de"}
+hostname = {text = "localhost"}
 nickname = {text = get_random_name()}
 error_msg = {text = ""}
 private_identifier = {text = ""}

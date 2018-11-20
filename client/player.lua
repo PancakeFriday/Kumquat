@@ -24,7 +24,7 @@ function Player:new(x,y,in_control)
 
 	self.mario_img = love.graphics.newImage("img/mario.png")
 
-	self.hitbox = HC.rectangle(self.x, self.y, self.mario_img:getWidth(), self.mario_img:getHeight())
+	self.hitbox = HC.rectangle(self.x-5, self.y-7, self.mario_img:getWidth(), self.mario_img:getHeight())
 
 	self:registerCallbacks()
 
@@ -74,7 +74,6 @@ function Player:update(dt)
 			self.jumping = false
 		end
 		local dx, dy = 0, 0
-		print("-----------------")
 
 		self.yforces = self.yforces + self.gravity
 
@@ -138,11 +137,9 @@ function Player:update(dt)
 		if self.vvel == 0 then
 			self.jumping = false
 		end
-		print("jump:",self.jumping, self.vvel)
 		if not self.jumping and math.abs(self.hvel) ~= self.maxhvel2 then
 			self.running = false
 		end
-		print("run:",self.running)
 
 		for i,v in pairs(self.key_press_frames) do
 			self.key_press_frames[i] = v+1
@@ -157,7 +154,7 @@ function Player:update(dt)
 end
 
 function Player:draw()
-	love.graphics.draw(self.mario_img, self.x, self.y)
+	love.graphics.draw(self.mario_img, self.x-5, self.y-7)
 	if DEV_DRAW then
 		self.hitbox:draw()
 	end
@@ -170,26 +167,46 @@ function Player:move(dx, dy)
 	-- x movement
 	self.hitbox:move(dx, 0)
 
+	local num_cols = 0
 	::start_xcheck::
-	for shape, delta in pairs(HC.collisions(self.hitbox)) do
-		if delta.x ~= 0 then
-			self.hitbox:move(delta.x, 0)
-			moveby_x = moveby_x + delta.x
-			self.hvel = 0
-			goto start_xcheck
+	if num_cols < 20 then
+		for shape, delta in pairs(HC.collisions(self.hitbox)) do
+			if shape.type and shape.type == "kill" then
+				--print("kill")
+			elseif shape.type and shape.type == "crystal" then
+				shape.obj.collected = true
+				HC.remove(shape)
+				Client:send("crystal_collect", {shape.obj.id})
+			elseif delta.x ~= 0 then
+				num_cols = num_cols + 1
+				self.hitbox:move(delta.x, 0)
+				moveby_x = moveby_x + delta.x
+				self.hvel = 0
+				goto start_xcheck
+			end
 		end
 	end
 
 	-- y movement
 	self.hitbox:move(0, dy)
 
+	local num_cols = 0
 	::start_ycheck::
-	for shape, delta in pairs(HC.collisions(self.hitbox)) do
-		if delta.y ~= 0 then
-			self.hitbox:move(0, delta.y)
-			moveby_y = moveby_y + delta.y
-			self.vvel = 0
-			goto start_ycheck
+	if num_cols < 20 then
+		for shape, delta in pairs(HC.collisions(self.hitbox)) do
+			if shape.type and shape.type == "kill" then
+				--print("kill")
+			elseif shape.type and shape.type == "crystal" then
+				shape.obj.collected = true
+				HC.remove(shape)
+				Client:send("crystal_collect", {shape.obj.id})
+			elseif delta.y ~= 0 then
+				num_cols = num_cols + 1
+				self.hitbox:move(0, delta.y)
+				moveby_y = moveby_y + delta.y
+				self.vvel = 0
+				goto start_ycheck
+			end
 		end
 	end
 
@@ -199,6 +216,10 @@ end
 
 function Player:keypressed(key)
 	self.key_press_frames[key] = 0
+end
+
+function Player:mousereleased(x,y,button)
+
 end
 
 return Player

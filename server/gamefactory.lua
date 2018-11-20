@@ -17,19 +17,24 @@ function Game:new(lobby)
 
 	local w,h = 100,100
 	self.level = Level(w,h,true)
-	self.level:newObject("grass",0,5,2,2,true)
-	self.level:newObject("grass",5,5,4,7,true)
-	self.level:newObject("grass",14,6,300,2,true)
-	self.level:newObject("grass",2,5,3,2,true)
-	self.level:newObject("grass",0,0,1,5,true)
+	--self.level:newObject("grass",0,5,7,2,true)
+	--self.level:newObject("grass",3,0,4,1,true)
+	--self.level:newObject("grass",5,5,4,7,true)
+	--self.level:newObject("grass",9,5,6,2,true)
+	--self.level:newObject("grass",16,8,3,2,true)
+	self.level:newObject("grass",0,10,10,2,true)
+	--self.level:newObject("grass",2,5,3,2,true)
+	--self.level:newObject("grass",0,0,1,5,true)
+	--self.level:newObject("grass",1,3,2,2,true)
+	--self.level:newObject("saw",5,3,1,5,true)
 
 	local level_data = self.level:getData()
 
 	if DEV_MODE then
 		self.players["buddy"].client:send("start_game", {
 			{
-				player={role="player", isself=false, nickname="test_player"},
-				buddy={role="buddy",nickname="test_buddy",isself=true},
+				player={role="player", isself=true, nickname="test_player"},
+				buddy={role="buddy",nickname="test_buddy",isself=false},
 				foe={role="foe",nickname="test_foe",isself=false}
 			}, level_data})
 	else
@@ -142,6 +147,21 @@ function GameFactory:registerCallbacks(Server)
 
 				for j,k in pairs(v.players) do
 					k.client:send("new_level_object", obj_vars)
+				end
+				break
+			end
+		end
+	end)
+
+	Server:on("crystal_collect", function(id, client)
+		for i,v in pairs(self.games) do
+			if v:findClient(client) then
+				v.level.crystals[id[1]].collected = true
+
+				for j,k in pairs(v.players) do
+					if k.client ~= client then
+						k.client:send("crystal_collect", id)
+					end
 				end
 				break
 			end
