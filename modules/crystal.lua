@@ -21,10 +21,6 @@ function Crystal:update(dt)
 		self.time = self.time + dt
 		self.my = math.sin(self.time*2.5)*3
 		self.hitbox:moveTo(self.x+self.img:getWidth()/2,self.y+self.my+self.img:getHeight()/2)
-
-		if love.keyboard.isDown("d") then
-			self.collected = true
-		end
 	end
 end
 
