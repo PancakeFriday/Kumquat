@@ -33,8 +33,8 @@ function Game:new(lobby)
 	if DEV_MODE then
 		self.players["buddy"].client:send("start_game", {
 			{
-				player={role="player", isself=true, nickname="test_player"},
-				buddy={role="buddy",nickname="test_buddy",isself=false},
+				player={role="player", isself=false, nickname="test_player"},
+				buddy={role="buddy",nickname="test_buddy",isself=true},
 				foe={role="foe",nickname="test_foe",isself=false}
 			}, level_data})
 	else

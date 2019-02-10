@@ -28,8 +28,8 @@ function Game:new(players, level_data)
 	if self.players["player"].in_control then
 		self.effect = Moonshine(Moonshine.effects.colorize)
 			.chain(Moonshine.effects.chromasep)
-			.chain(Moonshine.effects.crt)
 			.chain(Moonshine.effects.scanlines)
+			.chain(Moonshine.effects.crt)
 			.chain(Moonshine.effects.vignette)
 
 		self.effect.chromasep.angle = math.pi
@@ -117,6 +117,9 @@ end
 
 function Game:update(dt)
 	self.time = self.time % (2*math.pi)
+	if self.players["player"].in_control then
+		self.effect.scanlines.phase = self.time*30
+	end
 	if self.time + dt > 2*math.pi then
 		self.palette_sign = self.palette_sign*(-1)
 	end
