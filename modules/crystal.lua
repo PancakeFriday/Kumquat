@@ -1,17 +1,17 @@
 local Crystal = Object:extend()
 
-function Crystal:new(x,y,id,isserver)
+function Crystal:new(x,y,id)
 	self.x = x
 	self.y = y
 	self.my = 0
-	if not isserver then
-		local HC = require "HC"
-		self.img = love.graphics.newImage("img/objects/crystal.png")
-		self.hitbox = HC.rectangle(self.x,self.y,self.img:getWidth(),self.img:getHeight())
-		self.hitbox.type = "crystal"
-		self.hitbox.obj = self
-		self.time = math.random()*5
-	end
+
+	local HC = require "HC"
+	self.img = love.graphics.newImage("img/objects/crystal.png")
+	self.hitbox = HC.rectangle(self.x,self.y,self.img:getWidth(),self.img:getHeight())
+	self.hitbox.type = "crystal"
+	self.hitbox.obj = self
+	self.time = math.random()*5
+
 	self.collected = false
 	self.id = id
 end

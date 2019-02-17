@@ -5,18 +5,15 @@ local Crystal = require "crystal"
 
 local Level = Object:extend()
 
-function Level:new(w,h,isserver)
-	isserver = isserver or false
+function Level:new(w,h)
 	self.w = w
 	self.h = h
 	self.objects = {}
 	self.enemies = {}
 	self.crystals = {}
 
-	if isserver then
-		self:createMap()
-		self:createCrystals()
-	end
+	self:createMap()
+	self:createCrystals()
 end
 
 function Level:createMap()
@@ -96,11 +93,11 @@ function Level:applyCrystals(crystals)
 	end
 end
 
-function Level:newObject(t,x,y,w,h,isserver)
+function Level:newObject(t,x,y,w,h)
 	if lume.find({"grass"}, t) then
-		table.insert(self.objects, LevelBlock(t,x,y,w,h,isserver))
+		table.insert(self.objects, LevelBlock(t,x,y,w,h))
 	elseif lume.find({"saw"}, t) then
-		table.insert(self.objects, LevelObstacle(t,x,y,w,h,isserver))
+		table.insert(self.objects, LevelObstacle(t,x,y,w,h))
 	end
 end
 

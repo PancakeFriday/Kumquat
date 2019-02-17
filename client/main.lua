@@ -26,34 +26,6 @@ local Menu = require "menu"
 local Lobby = require "lobby"
 local Game = require "game"
 
-function connect_to_server(hostname)
-	if not Client or not Client:isConnected() then
-		-- Creating a new client on localhost:22122
-		Client = sock.newClient(hostname, PORT)
-
-		-- Called when a connection is made to the server
-		Client:on("connect", function(data)
-			print("Client connected to the server.")
-		end)
-
-		-- Custom callback, called whenever you send the event from the server
-		Client:on("handshake", function(_)
-			print("Received handshake!")
-		end)
-
-		Client:connect()
-		Client:update()
-
-		for i=0,50 do
-			if Client:isConnected() then
-				break
-			end
-			love.timer.sleep(0.1)
-			Client:update()
-		end
-	end
-end
-
 function love.load()
 	-- Limit FPS
 	min_dt = 1/60
@@ -63,18 +35,8 @@ function love.load()
 	math.randomseed(os.time())
 
 	Gamestate:register(Menu, "Menu")
-	Gamestate:register(Lobby, "Lobby")
 	Gamestate:register(Game, "Game")
 	Gamestate:set("Menu")
-
-	-- DEV
-	if DEV_MODE then
-		connect_to_server("localhost")
-		Client:on("start_game", function(game_data)
-			Gamestate:set("Game", unpack(game_data))
-		end)
-		Client:send("test_game")
-	end
 end
 
 function love.update(dt)
