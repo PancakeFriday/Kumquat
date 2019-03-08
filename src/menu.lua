@@ -22,6 +22,9 @@ function Menu:update(dt)
 	if self.ui:Button("Start game", self.ui.layout:row(200,30)).hit then
 		Gamestate:set("Game")
 	end
+	if self.ui:Button("Create game", self.ui.layout:row(200,30)).hit then
+		Gamestate:set("Game", true)
+	end
 end
 
 function Menu:draw()

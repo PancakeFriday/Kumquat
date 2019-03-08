@@ -1,5 +1,5 @@
 DEV_MODE = false
-DEV_DRAW = false
+DEV_DRAW = true
 
 PORT = 22122
 
@@ -9,6 +9,7 @@ SCREENW, SCREENH = 320,240
 love.graphics.setDefaultFilter( "nearest", "nearest", 1 )
 
 -- Add libraries to path
+package.path = package.path .. ";src/?.lua"
 package.path = package.path .. ";lib/?.lua"
 package.path = package.path .. ";lib/?/init.lua"
 local sock = require "sock"
@@ -16,12 +17,9 @@ local bitser = require "bitser"
 Object = require "classic"
 lume = require "lume"
 
--- Add modules to path
-package.path = package.path .. ";modules/?.lua"
 Gamestate = require "gamestate"
 
 -- Gamestates
-package.path = package.path .. ";client/?.lua"
 local Menu = require "menu"
 local Lobby = require "lobby"
 local Game = require "game"

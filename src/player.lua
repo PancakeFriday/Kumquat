@@ -1,10 +1,16 @@
+local Animation = require "animation"
 local HC = require "HC"
 
 Player = Object:extend()
 
 function Player:new(x,y,in_control)
+	self.origin_x = 0
+	self.origin_y = 0
+
 	self.x = x*16
 	self.y = y*16
+	self.w = 10
+	self.h = 14
 
 	self.in_control = in_control
 
@@ -22,14 +28,19 @@ function Player:new(x,y,in_control)
 	self.gravity = 1440
 	self.jumpvel = 250
 
-	self.mario_img = love.graphics.newImage("img/mario.png")
+	--self.player_img = love.graphics.newImage("img/player.png")
+	self.player_anim = Animation("img/player.png")
+	self.player_anim:create("idle", 0, 0, 10, 14, 1)
+	self.player_anim:create("walking", 10, 0, 10, 14, 2)
+	self.player_anim:set("idle")
 
-	self.hitbox = HC.rectangle(self.x-5, self.y-7, self.mario_img:getWidth(), self.mario_img:getHeight())
+	self.hitbox = HC.rectangle(self.x-5, self.y-7, self.w, self.h)
 
 	self.key_press_frames = {}
 end
 
 function Player:update(dt)
+	self.player_anim:update(dt)
 	for i,v in pairs(self.key_press_frames) do
 		if not love.keyboard.isDown(i) then
 			self.key_press_frames[i] = nil
@@ -70,27 +81,36 @@ function Player:update(dt)
 			end
 		end
 	end
+	if self.xforces < 0 then
+		self.player_anim:set_hflipped(true)
+	elseif self.xforces > 0 then
+		self.player_anim:set_hflipped(false)
+	end
 	if self.xforces == 0 then
+		self.player_anim:set("idle")
 		-- Apply friction
 		self.xforces = self.xforces - self.hfriction * self.hvel
+	else
+		self.player_anim:set("walking")
 	end
 	self.hvel = lume.clamp(self.hvel + self.xforces*dt, -self.maxhvel, self.maxhvel)
 	self.vvel = lume.clamp(self.vvel + self.yforces*dt, -self.maxvvel, self.maxvvel)
 
-	if self.key_press_frames["lshift"] then
-		if math.abs(self.hvel) == self.maxhvel then
-			-- Don't start the run when we are in the air, however do continue it
-			-- anytime
-			if not self.jumping or self.running then
-				if self.key_press_frames["lshift"] >= 10 then
-					self.running = true
-					self.hvel = lume.sign(self.hvel)*self.maxhvel2
-				end
-			end
-		else
-			self.key_press_frames["lshift"] = 0
-		end
-	end
+	-- Fast walking. Not sure if we want this?
+	--if self.key_press_frames["lshift"] then
+		--if math.abs(self.hvel) == self.maxhvel then
+			---- Don't start the run when we are in the air, however do continue it
+			---- anytime
+			--if not self.jumping or self.running then
+				--if self.key_press_frames["lshift"] >= 10 then
+					--self.running = true
+					--self.hvel = lume.sign(self.hvel)*self.maxhvel2
+				--end
+			--end
+		--else
+			--self.key_press_frames["lshift"] = 0
+		--end
+	--end
 
 	self.xforces = 0
 	self.yforces = 0
@@ -113,10 +133,20 @@ function Player:update(dt)
 end
 
 function Player:draw()
-	love.graphics.draw(self.mario_img, self.x-5, self.y-7)
+	love.graphics.push()
+	love.graphics.translate(self.x, self.y-7)
+	self.player_anim:draw()
+	love.graphics.pop()
+	--love.graphics.draw(self.player_img, self.x-5, self.y-7)
 	if DEV_DRAW then
 		self.hitbox:draw()
 	end
+end
+
+function Player:move_to(ix,iy)
+	self.x = ix*16+5
+	self.y = iy*16
+	self.hitbox:moveTo(ix*16+5,iy)
 end
 
 function Player:move(dx, dy)

@@ -13,44 +13,36 @@ function Level:new(w,h)
 	self.crystals = {}
 
 	self:createMap()
-	self:createCrystals()
+end
+
+function Level:recreate_from_data(data)
+	self.w = data.w
+	self.h = data.h
+	self.objects = {}
+	for i,v in pairs(data.objects) do
+		self:newObject(v.type,v.x,v.y,v.w,v.h)
+	end
+	self.map = {}
+	for i,v in pairs(data.mapdata) do
+		table.insert(self.map, LevelScreen(v.x,v.y,v.neighbors))
+	end
+	self.crystals = data.crystals
 end
 
 function Level:createMap()
 	local num_screens = 1
 	local screen = LevelScreen()
 	self.map = {screen}
-
-	local map_it = 1
-	while num_screens < 20 do
-		::get_new_screen::
-		screen = self.map[map_it]
-		local new_screen, dir = screen:newNeighbor()
-		if new_screen == false then
-			map_it = map_it-1
-			goto get_new_screen
-		end
-		for i,v in pairs(self.map) do
-			if new_screen.x == v.x and new_screen.y == v.y then
-				screen.neighbors[dir] = true
-				goto get_new_screen
-			end
-		end
-		screen = new_screen
-		map_it = map_it + 1
-		num_screens = num_screens + 1
-		table.insert(self.map, map_it, screen)
-	end
 end
 
-function Level:createCrystals()
-	local copy_map = lume.clone(self.map)
-	for i=1,5 do
-		local screen = lume.randomchoice(copy_map)
-		lume.remove(copy_map, screen)
-		local x = (screen.x+0.5)*SCREENW
-		local y = (screen.y+0.5)*SCREENH
-		table.insert(self.crystals, Crystal(x,y,i,true))
+function Level:addScreenAt(x,y)
+	if not self:isScreenAtPos(x,y) then
+		local neighbors = {}
+		for i,v in pairs({right={x+1,y},left={x-1,y},bottom={x,y+1},top={x,y-1}}) do
+			neighbors[i] = self:isScreenAtPos(v[1],v[2])
+		end
+		screen = LevelScreen(x,y,neighbors)
+		table.insert(self.map, screen)
 	end
 end
 
@@ -76,23 +68,6 @@ function Level:getBounds()
 	return minx, miny, maxx, maxy
 end
 
-function Level:applyMap(mapdata)
-	self.shapes = {}
-	local HC = require "HC"
-	local screenw, screenh = love.graphics.getWidth()/3, love.graphics.getHeight()/3
-	self.map = {}
-	for i,v in pairs(mapdata) do
-		table.insert(self.map, LevelScreen(v.x,v.y,v.neighbors))
-	end
-end
-
-function Level:applyCrystals(crystals)
-	self.crystals = {}
-	for i,v in pairs(crystals) do
-		table.insert(self.crystals, Crystal(v.x,v.y,v.id,false))
-	end
-end
-
 function Level:newObject(t,x,y,w,h)
 	if lume.find({"grass"}, t) then
 		table.insert(self.objects, LevelBlock(t,x,y,w,h))
@@ -101,7 +76,7 @@ function Level:newObject(t,x,y,w,h)
 	end
 end
 
-function Level:getData()
+function Level:get_data()
 	local objects = {}
 	for i,o in pairs(self.objects) do
 		table.insert(objects, o:getData())
@@ -111,13 +86,6 @@ function Level:getData()
 	for i,v in pairs(self.map) do
 		table.insert(mapdata, {
 			x=v.x, y=v.y, neighbors=v.neighbors
-		})
-	end
-
-	local crystals = {}
-	for i,v in pairs(self.crystals) do
-		table.insert(crystals, {
-			x=v.x,y=v.y,id=v.id
 		})
 	end
 
@@ -136,22 +104,11 @@ function Level:update(dt)
 			v:update(dt)
 		end
 	end
-	for i,v in pairs(self.crystals) do
-		v:update(dt)
-	end
 end
 
 function Level:draw()
 	for i,o in pairs(self.objects) do
 		o:draw()
-	end
-	for i,v in pairs(self.crystals) do
-		v:draw()
-	end
-	if DEV_DRAW then
-		for i,v in pairs(self.shapes) do
-			v:draw()
-		end
 	end
 end
 
